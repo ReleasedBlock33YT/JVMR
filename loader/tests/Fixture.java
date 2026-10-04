@@ -2,6 +2,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.IntUnaryOperator;
 
 public final class Fixture {
@@ -38,6 +43,77 @@ public final class Fixture {
     }
     public static int platformValue() {
         return System.getProperty("java.version").length() + Runtime.getRuntime().availableProcessors();
+    }
+    public static int threadValue() {
+        Thread thread = Thread.currentThread();
+        return thread.getName().length() + thread.getPriority()
+            + (thread.isAlive() ? 1 : 0) + (Thread.activeCount() == 1 ? 1 : 0);
+    }
+    public static int coreNativeValue() throws InterruptedException {
+        Object monitor = new Object();
+        monitor.notify();
+        monitor.notifyAll();
+        monitor.wait(0L);
+        return String.class.desiredAssertionStatus() ? 0 : 1;
+    }
+    public static int numericNativeValue() {
+        float value = Float.intBitsToFloat(Float.floatToRawIntBits(3.5f));
+        return (int) value + (int) Math.floor(2.9) + (Math.cos(0.0) == 1.0 ? 1 : 0);
+    }
+    public static int propertyValue() {
+        String home = System.getProperty("java.home", "missing");
+        String encoding = System.getProperty("file.encoding", "missing");
+        return (home.length() > 0 ? 1 : 0) + (encoding.equals("UTF-8") ? 2 : 0)
+            + (System.getenv("JVMR_TEST_MISSING") == null ? 4 : 0);
+    }
+    public static int platformLibraryValue() {
+        return System.mapLibraryName("jvmr").endsWith(".so") ? 1 : 0;
+    }
+    public static int fileValue() {
+        File current = new File(".");
+        File fixture = new File("loader/build/Fixture.class");
+        return (current.exists() ? 1 : 0) + (current.isDirectory() ? 2 : 0)
+            + (fixture.isFile() ? 4 : 0) + (fixture.length() > 0 ? 8 : 0);
+    }
+    public static int streamValue() throws Exception {
+        FileInputStream stream = new FileInputStream("loader/build/Fixture.class");
+        int first = stream.read();
+        byte[] next = new byte[3];
+        int count = stream.read(next, 0, 3);
+        stream.close();
+        return (first == 0xca && count == 3 && (next[0] & 0xff) == 0xfe
+            && (next[1] & 0xff) == 0xba && (next[2] & 0xff) == 0xbe) ? 1 : 0;
+    }
+    public static int outputStreamValue() throws Exception {
+        FileOutputStream output = new FileOutputStream("loader/build/jvmr-output.bin");
+        output.write(new byte[] { 7, 8, 9 });
+        output.close();
+        FileInputStream input = new FileInputStream("loader/build/jvmr-output.bin");
+        byte[] bytes = new byte[3];
+        int count = input.read(bytes);
+        input.close();
+        return count == 3 && bytes[0] == 7 && bytes[1] == 8 && bytes[2] == 9 ? 1 : 0;
+    }
+    public static int nioValue() throws Exception {
+        Path path = Path.of("loader/build/Fixture.class");
+        byte[] bytes = Files.readAllBytes(path);
+        return (Files.exists(path) ? 1 : 0) + (bytes[0] == (byte) 0xca ? 2 : 0)
+            + (Files.size(path) > 0 ? 4 : 0);
+    }
+    public static int nioExtendedValue() throws Exception {
+        Path classFile = Path.of("loader/build/Fixture.class");
+        Path sourceDirectory = Path.of("loader/tests");
+        String source = Files.readString(Path.of("loader/tests/Fixture.java"));
+        return (Files.isRegularFile(classFile) ? 1 : 0)
+            + (Files.isDirectory(sourceDirectory) ? 2 : 0)
+            + (source.contains("class Fixture") ? 4 : 0);
+    }
+    public static int nioWriteValue() throws Exception {
+        Path directory = Path.of("loader/build/jvmr-nio");
+        Path file = Path.of("loader/build/jvmr-nio/data.txt");
+        Files.createDirectories(directory);
+        Files.writeString(file, "jvmr");
+        return Files.readString(file).equals("jvmr") ? 1 : 0;
     }
     public static int argLength(String[] args) {
         return args.length;
@@ -118,6 +194,9 @@ public final class Fixture {
     public static int builderLength() {
         return new StringBuilder().append("abc").append(123).toString().length();
     }
+    public static int builderRangeValue() {
+        return new StringBuilder().append("abcdef", 1, 4).toString().equals("bcd") ? 1 : 0;
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
@@ -127,6 +206,9 @@ public final class Fixture {
     }
     public static int inheritedValue() {
         return new Derived().baseValue() * 2;
+    }
+    public static int inheritedFieldValue() {
+        return new Derived().inheritedField();
     }
     public static int constantStringLength() {
         return constantString.length();

@@ -57,6 +57,56 @@ static int run_class_file(int argc, char **argv, const char *path, const char *m
 	return result == 0 ? JVM_SUCCESS : INIT_FAIL;
 }
 
+static int run_classpath(int argc, char **argv) {
+	if (argc < 4) return INIT_FAIL;
+	JVMR_ClassLoader *loader = jvmr_classloader_create();
+	if (!loader) return INIT_FAIL;
+	char *paths = strdup(argv[2]);
+	if (!paths) { jvmr_classloader_destroy(loader); return INIT_FAIL; }
+	for (char *path = strtok(paths, ":"); path; path = strtok(NULL, ":"))
+		if (jvmr_classloader_add_path(loader, path) != 0) {
+			free(paths); jvmr_classloader_destroy(loader); return INIT_FAIL;
+		}
+	const char *java_home = getenv("JAVA_HOME");
+	if (!java_home) java_home = "/usr/lib/jvm/java-21-openjdk-amd64";
+	(void)jvmr_classloader_add_java_runtime(loader, java_home);
+	char class_name[1024];
+	if (strlen(argv[3]) >= sizeof(class_name)) {
+		free(paths); jvmr_classloader_destroy(loader); return INIT_FAIL;
+	}
+	strcpy(class_name, argv[3]);
+	for (char *p = class_name; *p; p++) if (*p == '.') *p = '/';
+	const JVMR_Class *klass = jvmr_classloader_load(loader, class_name, NULL, 0);
+	if (!klass) {
+		fprintf(stderr, "[JVMR/ERROR] class %s was not found on the class path.\n", argv[3]);
+		free(paths); jvmr_classloader_destroy(loader); return INIT_FAIL;
+	}
+	jvmr_runtime_set_classloader(loader);
+	const char *method_name = argc > 4 ? argv[4] : "main";
+	const char *descriptor = argc > 5 ? argv[5] : "([Ljava/lang/String;)V";
+	uint64_t arguments[1] = { 0 };
+	uint16_t argument_count = 0;
+	if (!strcmp(method_name, "main") && !strcmp(descriptor, "([Ljava/lang/String;)V")) {
+		int array = jvmr_heap_new_array(JVMR_HEAP_REF_ARRAY, argc > 6 ? argc - 6 : 0);
+		if (array < 0) { jvmr_runtime_set_classloader(NULL); free(paths); jvmr_classloader_destroy(loader); return INIT_FAIL; }
+		for (int i = 6; i < argc; i++) {
+			int string = jvmr_heap_new_string((const uint8_t *)argv[i], (uint16_t)strlen(argv[i]), klass);
+			if (string < 0 || jvmr_heap_array_store((uint64_t)array, i - 6, (uint64_t)string)) {
+				jvmr_runtime_set_classloader(NULL); free(paths); jvmr_classloader_destroy(loader); return INIT_FAIL;
+			}
+		}
+		arguments[0] = (uint64_t)array;
+		argument_count = 1;
+	}
+	int result = jvmr_execute_class_method_args(klass, method_name, descriptor, arguments, argument_count);
+	if (result != 0) fprintf(stderr, "[JVMR/ERROR] method %s%s was not found or failed.\n", method_name, descriptor);
+	else if (current_frame.sp > 0) printf("[JVMR/INFO] result: %llu\n", (unsigned long long)current_frame.stack[current_frame.sp - 1]);
+	jvmr_runtime_set_classloader(NULL);
+	free(paths);
+	jvmr_classloader_destroy(loader);
+	return result == 0 ? JVM_SUCCESS : INIT_FAIL;
+}
+
 int main(int argc, char *argv[]) {
 	// JVM initializer
 	int bci = bytecode_init();
@@ -64,6 +114,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "FATAL: Bytecode initialization failed.\n       Check Earlier logs.\n");
 		return INIT_FAIL;
 	}
+	if (argc >= 4 && !strcmp(argv[1], "--cp")) return run_classpath(argc, argv);
 	if (argc >= 3) return run_class_file(argc,argv,argv[1], argv[2], argc >= 4 ? argv[3] : "()I");
 
 	printf("Hello, JVM World!\n");

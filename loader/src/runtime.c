@@ -85,7 +85,7 @@ int jvmr_invoke_static(uint16_t constant_pool_index) {
 	if (jvmr_ensure_initialized(owner_class)) { current_frame.pc=UINT32_MAX; return -1; }
 	if (arguments > current_frame.sp || call_depth >= JVMR_CALL_STACK_MAX) { fprintf(stderr, "[JVMR/ERROR] invalid invokestatic arguments or call-stack overflow.\n"); current_frame.pc = UINT32_MAX; return -1; }
 	if (jvmr_native_invoke(owner_class,method,1)==0) return 0;
-	if (!method->code) { fprintf(stderr,"[JVMR/ERROR] native method %s%s is not implemented.\n",method->name,method->descriptor); current_frame.pc=UINT32_MAX; return -1; }
+	if (!method->code) { fprintf(stderr,"[JVMR/ERROR] native method %s.%s%s is not implemented.\n",owner_class&&owner_class->name?owner_class->name:"?",method->name,method->descriptor); current_frame.pc=UINT32_MAX; return -1; }
 	int caller_sp = current_frame.sp;
 	call_stack[call_depth++] = (SavedFrame){ current_frame, runtime_method, runtime_class, 0, NULL };
 	JVMR_Frame callee; memset(&callee, 0, sizeof(callee)); callee.code = (uint8_t *)method->code; callee.code_length = method->code_length;
@@ -106,7 +106,7 @@ int jvmr_invoke_instance(uint16_t constant_pool_index) {
 	if (!invoke_declared_method && string_object && runtime_loader && name && descriptor) { const JVMR_Class *string_class=jvmr_classloader_load(runtime_loader,"java/lang/String",NULL,0);const JVMR_Method *candidate=string_class?jvmr_class_find_method(string_class,name,descriptor):NULL;if(candidate){method=candidate;owner_class=string_class;} }
 	if (!invoke_declared_method && !string_object && receiver_class && name && descriptor) for (const JVMR_Class *current=receiver_class;current;){const JVMR_Method *candidate=jvmr_class_find_method(current,name,descriptor);if(candidate){method=candidate;owner_class=current;break;}if(!current->super_name||!runtime_loader)break;current=jvmr_classloader_load(runtime_loader,current->super_name,NULL,0);}
 	if (jvmr_native_invoke(owner_class,method,0)==0) return 0;
-	if(!method->code) { fprintf(stderr,"[JVMR/ERROR] native method %s%s is not implemented.\n",method->name,method->descriptor); current_frame.pc=UINT32_MAX; return -1; }
+	if(!method->code) { fprintf(stderr,"[JVMR/ERROR] native method %s.%s%s is not implemented.\n",owner_class&&owner_class->name?owner_class->name:"?",method->name,method->descriptor); current_frame.pc=UINT32_MAX; return -1; }
 	int caller_sp=current_frame.sp;
 	call_stack[call_depth++]=(SavedFrame){current_frame,runtime_method,runtime_class,0,NULL};
 	SavedFrame *saved=&call_stack[call_depth-1];
@@ -122,6 +122,12 @@ int jvmr_invoke_interface(uint16_t constant_pool_index) {
 	const char *owner_name,*name,*descriptor;if(reference_info(constant_pool_index,&owner_name,&name,&descriptor))return -1;
 	int arguments=descriptor_arguments(descriptor);if(arguments<0||current_frame.sp<arguments+1||call_depth>=JVMR_CALL_STACK_MAX){current_frame.pc=UINT32_MAX;return -1;}
 	uint64_t receiver=current_frame.stack[current_frame.sp-arguments-1];const JVMR_Class *receiver_class=jvmr_heap_object_class(receiver);const JVMR_Class *implementation_class=receiver_class;const JVMR_Method *method=receiver_class?jvmr_class_find_method(receiver_class,name,descriptor):NULL;const uint64_t *captured=NULL;uint16_t captured_count=0;int lambda=jvmr_heap_lambda_info(receiver,&implementation_class,&method,&captured,&captured_count)==0;
+	if(!method&&owner_name&&!strcmp(owner_name,"jdk/internal/access/JavaIOFileDescriptorAccess")){
+		if(!strcmp(name,"getAppend")&&!strcmp(descriptor,"(Ljava/io/FileDescriptor;)Z")){current_frame.sp-=arguments+1;current_frame.stack[current_frame.sp++]=0;return 0;}
+		if(!strcmp(name,"get")&&!strcmp(descriptor,"(Ljava/io/FileDescriptor;)I")){current_frame.sp-=arguments+1;current_frame.stack[current_frame.sp++]=(uint32_t)-1;return 0;}
+		if(!strcmp(name,"getHandle")&&!strcmp(descriptor,"(Ljava/io/FileDescriptor;)J")){current_frame.sp-=arguments+1;current_frame.stack[current_frame.sp++]=0;return 0;}
+		if(!strcmp(name,"set")||!strcmp(name,"setAppend")||!strcmp(name,"close")||!strcmp(name,"registerCleanup")||!strcmp(name,"unregisterCleanup")||!strcmp(name,"setHandle")){current_frame.sp-=arguments+1;if(descriptor[strlen(descriptor)-1]=='V')return 0;}
+	}
 	if(!method||!method->code){fprintf(stderr,"[JVMR/ERROR] interface method %s%s has no concrete implementation.\n",name,descriptor);current_frame.pc=UINT32_MAX;return -1;}
 	int caller_sp=current_frame.sp;call_stack[call_depth++]=(SavedFrame){current_frame,runtime_method,runtime_class,0,NULL};SavedFrame *saved=&call_stack[call_depth-1];saved->frame.sp-=arguments+1;JVMR_Frame callee;memset(&callee,0,sizeof(callee));callee.code=(uint8_t*)method->code;callee.code_length=method->code_length;int local=0;if(!lambda||!(method->access_flags&0x0008))callee.locals[local++]=receiver;if(lambda)for(uint16_t i=0;i<captured_count;i++)callee.locals[local++]=captured[i];for(int i=0;i<arguments;i++)callee.locals[local+i]=saved->frame.stack[caller_sp-arguments+i];current_frame=callee;runtime_method=method;runtime_class=implementation_class;return 0;
 }
@@ -219,6 +225,7 @@ const JVMR_Class *jvmr_runtime_load_class_name(const char *name) {
 int jvmr_runtime_class_is_assignable(const JVMR_Class *candidate,const JVMR_Class *target) {
 	for(const JVMR_Class *current=candidate;current;){if(current==target||(current->name&&target&&target->name&&!strcmp(current->name,target->name)))return 1;for(uint16_t i=0;i<current->interface_count;i++){const JVMR_Class *interface_class=jvmr_runtime_load_class_name(current->interfaces[i]);if(interface_class&&jvmr_runtime_class_is_assignable(interface_class,target))return 1;}if(!current->super_name)break;current=jvmr_runtime_load_class_name(current->super_name);}return 0;
 }
+int jvmr_runtime_field_offset(const JVMR_Class *object_class,const JVMR_Class *declaring_class,const JVMR_Field *field) { if(!object_class||!declaring_class||!field)return -1;int offset=field->slot;const JVMR_Class *current=object_class;while(current&&current!=declaring_class){offset+=current->field_count;if(!current->super_name)break;current=jvmr_runtime_load_class_name(current->super_name);}return current==declaring_class?offset:-1; }
 int jvmr_runtime_is_instance(uint64_t reference, const JVMR_Class *target) {
 	const JVMR_Class *current;
 	if (!reference || !target) return 0;
@@ -238,4 +245,4 @@ int jvmr_runtime_is_instance(uint64_t reference, const JVMR_Class *target) {
 	}
 	return 0;
 }
-void jvmr_runtime_set_classloader(JVMR_ClassLoader *loader) { runtime_loader=loader; }
+void jvmr_runtime_set_classloader(JVMR_ClassLoader *loader) { runtime_loader=loader; if(loader){const JVMR_Class *klass=jvmr_classloader_load(loader,"java/lang/String",NULL,0);jvmr_heap_set_string_class(klass);} }

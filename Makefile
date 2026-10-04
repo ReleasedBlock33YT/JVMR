@@ -19,6 +19,8 @@ test_loader:
 	./loader/build/loader loader/build/Fixture.class caller '()I'
 	./loader/build/loader loader/build/Fixture.class nativeMath '()I'
 	./loader/build/loader loader/build/Fixture.class main '([Ljava/lang/String;)V' smoke test
+	./loader/build/loader --cp loader/build Fixture main '([Ljava/lang/String;)V' smoke test
+	./loader/build/loader --cp loader/build/fixture.jar Fixture caller '()I'
 
 clean_loader:
 	rm -rfv loader/build

@@ -276,6 +276,50 @@ static void test_class_file(const char *path) {
 			"platform bootstrap calls return host runtime information");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 3,
 			"Java version and processor-count properties are available");
+		CHECK(jvmr_execute_class_method(&klass, "threadValue", "()I") == 0,
+			"Thread compatibility methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 11,
+			"Thread compatibility methods return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "coreNativeValue", "()I") == 0,
+			"core Object and Class native methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"core Object monitor and assertion natives return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "numericNativeValue", "()I") == 0,
+			"floating-point library natives execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 6,
+			"floating-point conversion and Math natives return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "propertyValue", "()I") == 0,
+			"system property overloads and environment lookup execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 7,
+			"system property defaults and standard properties return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "platformLibraryValue", "()I") == 0,
+			"platform library-name mapping executes");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"platform library-name mapping returns a native library suffix");
+		CHECK(jvmr_execute_class_method(&klass, "fileValue", "()I") == 0,
+			"Java File filesystem methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 15,
+			"Java File existence, type, and length checks return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "streamValue", "()I") == 0,
+			"Java FileInputStream reads fixture bytes");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"Java FileInputStream preserves byte order and close semantics");
+		CHECK(jvmr_execute_class_method(&klass, "outputStreamValue", "()I") == 0,
+			"Java FileOutputStream writes fixture data");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"Java FileOutputStream round-trips bytes through the host filesystem");
+		CHECK(jvmr_execute_class_method(&klass, "nioValue", "()I") == 0,
+			"Java NIO path and file methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 7,
+			"Java NIO existence, read, and size operations return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "nioExtendedValue", "()I") == 0,
+			"extended Java NIO file operations execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 7,
+			"Java NIO type checks and readString return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "nioWriteValue", "()I") == 0,
+			"Java NIO directory and write methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"Java NIO writeString and readString round-trip host data");
 		CHECK(jvmr_execute_class_method(&klass, "identityValue", "()I") == 0,
 			"identityHashCode executes for managed objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
@@ -342,6 +386,10 @@ static void test_class_file(const char *path) {
 			"StringBuilder construction and chaining executes");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 6,
 			"StringBuilder append and toString preserve text");
+		CHECK(jvmr_execute_class_method(&klass, "builderRangeValue", "()I") == 0,
+			"StringBuilder range append executes");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"StringBuilder range append preserves the requested subsequence");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;
@@ -355,6 +403,10 @@ static void test_class_file(const char *path) {
 			"virtual dispatch searches superclass methods");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 42,
 			"inherited method execution returns its result");
+		CHECK(jvmr_execute_class_method(&klass, "inheritedFieldValue", "()I") == 0,
+			"inherited instance fields execute through a subclass object");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 12,
+			"inherited instance fields use the correct object layout offset");
 		CHECK(jvmr_execute_class_method(&klass, "constantStringLength", "()I") == 0,
 			"static string fields execute through getstatic");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 8,

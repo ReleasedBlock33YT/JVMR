@@ -19,12 +19,14 @@ int jvmr_heap_field_mirror(uint64_t reference, const struct JVMR_Class **declari
 int jvmr_heap_new_lambda(const struct JVMR_Class *interface_class, const struct JVMR_Class *implementation_class, const struct JVMR_Method *method, const uint64_t *captured, uint16_t captured_count);
 int jvmr_heap_lambda_info(uint64_t reference, const struct JVMR_Class **implementation_class, const struct JVMR_Method **method, const uint64_t **captured, uint16_t *captured_count);
 int jvmr_heap_new_string(const uint8_t *bytes, uint16_t length, const struct JVMR_Class *klass);
+void jvmr_heap_set_string_class(const struct JVMR_Class *klass);
 int jvmr_heap_new_array(JVMR_HeapKind kind, int32_t length);
 int jvmr_heap_array_length(uint64_t reference, int32_t *length);
 int jvmr_heap_array_load(uint64_t reference, int32_t index, uint64_t *value);
 int jvmr_heap_array_store(uint64_t reference, int32_t index, uint64_t value);
 int jvmr_heap_field_load(uint64_t reference, uint16_t slot, uint64_t *value);
 int jvmr_heap_field_store(uint64_t reference, uint16_t slot, uint64_t value);
+int jvmr_heap_field_load_named(uint64_t reference, const char *name, const char *descriptor, uint64_t *value);
 const struct JVMR_Class *jvmr_heap_object_class(uint64_t reference);
 int jvmr_heap_string_length(uint64_t reference, int32_t *length);
 int jvmr_heap_string_char_at(uint64_t reference, int32_t index, uint16_t *value);
@@ -33,6 +35,7 @@ int32_t jvmr_heap_string_hash(uint64_t reference);
 int jvmr_heap_string_copy(uint64_t reference, char *buffer, size_t capacity, size_t *length);
 int jvmr_heap_builder_append_string(uint64_t builder, uint64_t string);
 int jvmr_heap_builder_append_int(uint64_t builder, int32_t value);
+int jvmr_heap_builder_append_chars(uint64_t builder, const char *text, size_t length);
 int jvmr_heap_builder_to_string(uint64_t builder, int *reference);
 void jvmr_heap_destroy(void);
 

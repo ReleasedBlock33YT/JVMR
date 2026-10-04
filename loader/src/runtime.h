@@ -23,6 +23,7 @@ const JVMR_Class *jvmr_runtime_class(void);
 const JVMR_Class *jvmr_runtime_resolve_class(uint16_t constant_pool_index);
 const JVMR_Class *jvmr_runtime_load_class_name(const char *name);
 int jvmr_runtime_class_is_assignable(const JVMR_Class *candidate, const JVMR_Class *target);
+int jvmr_runtime_field_offset(const JVMR_Class *object_class, const JVMR_Class *declaring_class, const JVMR_Field *field);
 int jvmr_invoke_reflected(const JVMR_Class *declaring_class, const JVMR_Method *method, uint64_t receiver, const uint64_t *arguments, uint16_t argument_count);
 int jvmr_runtime_is_instance(uint64_t reference, const JVMR_Class *target);
 int jvmr_ensure_initialized(const JVMR_Class *klass);
