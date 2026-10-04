@@ -336,6 +336,10 @@ static void test_class_file(const char *path) {
 			"context ClassLoader lookup executes");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"context ClassLoader resolves an application class");
+		CHECK(jvmr_execute_class_method(&klass, "pathValue", "()I") == 0,
+			"NIO Path composition and inspection execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"NIO Path resolve, filename, parent, and equality work");
 		CHECK(jvmr_execute_class_method(&klass, "identityValue", "()I") == 0,
 			"identityHashCode executes for managed objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

@@ -142,6 +142,14 @@ public final class Fixture {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         return loader != null && loader.loadClass("Fixture") == Fixture.class ? 1 : 0;
     }
+    public static int pathValue() {
+        Path base = Path.of("loader/build");
+        Path file = base.resolve("Fixture.class");
+        return file.toString().endsWith("loader/build/Fixture.class")
+            && file.getFileName().toString().equals("Fixture.class")
+            && file.getParent().equals(base)
+            && file.equals(Path.of("loader/build/Fixture.class")) ? 1 : 0;
+    }
     public static int argLength(String[] args) {
         return args.length;
     }

@@ -128,6 +128,10 @@ int jvmr_invoke_interface(uint16_t constant_pool_index) {
 		if(!strcmp(name,"getHandle")&&!strcmp(descriptor,"(Ljava/io/FileDescriptor;)J")){current_frame.sp-=arguments+1;current_frame.stack[current_frame.sp++]=0;return 0;}
 		if(!strcmp(name,"set")||!strcmp(name,"setAppend")||!strcmp(name,"close")||!strcmp(name,"registerCleanup")||!strcmp(name,"unregisterCleanup")||!strcmp(name,"setHandle")){current_frame.sp-=arguments+1;if(descriptor[strlen(descriptor)-1]=='V')return 0;}
 	}
+	const JVMR_Class *native_owner=owner_name&&runtime_loader?jvmr_classloader_load(runtime_loader,owner_name,NULL,0):implementation_class;
+	const JVMR_Method *native_method=method;
+	if(!native_method&&native_owner)native_method=jvmr_class_find_method(native_owner,name,descriptor);
+	if(jvmr_native_invoke(native_owner,native_method,0)==0)return 0;
 	if(!method||!method->code){fprintf(stderr,"[JVMR/ERROR] interface method %s%s has no concrete implementation.\n",name,descriptor);current_frame.pc=UINT32_MAX;return -1;}
 	int caller_sp=current_frame.sp;call_stack[call_depth++]=(SavedFrame){current_frame,runtime_method,runtime_class,0,NULL};SavedFrame *saved=&call_stack[call_depth-1];saved->frame.sp-=arguments+1;JVMR_Frame callee;memset(&callee,0,sizeof(callee));callee.code=(uint8_t*)method->code;callee.code_length=method->code_length;int local=0;if(!lambda||!(method->access_flags&0x0008))callee.locals[local++]=receiver;if(lambda)for(uint16_t i=0;i<captured_count;i++)callee.locals[local++]=captured[i];for(int i=0;i<arguments;i++)callee.locals[local+i]=saved->frame.stack[caller_sp-arguments+i];current_frame=callee;runtime_method=method;runtime_class=implementation_class;return 0;
 }
