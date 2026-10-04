@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.function.IntUnaryOperator;
 
 public final class Fixture {
@@ -149,6 +150,17 @@ public final class Fixture {
             && file.getFileName().toString().equals("Fixture.class")
             && file.getParent().equals(base)
             && file.equals(Path.of("loader/build/Fixture.class")) ? 1 : 0;
+    }
+    public static int nioStreamValue() throws Exception {
+        InputStream input = Files.newInputStream(Path.of("loader/build/Fixture.class"));
+        int a = input.read(), b = input.read();
+        input.close();
+        Path outputPath = Path.of("loader/build/jvmr-nio-stream.bin");
+        OutputStream output = Files.newOutputStream(outputPath);
+        output.write(new byte[] { 4, 5, 6 });
+        output.close();
+        byte[] bytes = Files.readAllBytes(outputPath);
+        return a == 0xca && b == 0xfe && bytes.length == 3 && bytes[2] == 6 ? 1 : 0;
     }
     public static int argLength(String[] args) {
         return args.length;

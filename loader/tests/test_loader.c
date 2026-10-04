@@ -340,6 +340,10 @@ static void test_class_file(const char *path) {
 			"NIO Path composition and inspection execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"NIO Path resolve, filename, parent, and equality work");
+		CHECK(jvmr_execute_class_method(&klass, "nioStreamValue", "()I") == 0,
+			"NIO stream factories execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"NIO input and output streams round-trip host bytes");
 		CHECK(jvmr_execute_class_method(&klass, "identityValue", "()I") == 0,
 			"identityHashCode executes for managed objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
