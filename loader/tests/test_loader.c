@@ -300,6 +300,10 @@ static void test_class_file(const char *path) {
 			"Java File filesystem methods execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 15,
 			"Java File existence, type, and length checks return expected values");
+		CHECK(jvmr_execute_class_method(&klass, "fileExtendedValue", "()I") == 0,
+			"extended Java File methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"Java File names, parents, Path conversion, and listFiles work");
 		CHECK(jvmr_execute_class_method(&klass, "streamValue", "()I") == 0,
 			"Java FileInputStream reads fixture bytes");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

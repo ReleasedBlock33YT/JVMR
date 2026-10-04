@@ -83,6 +83,14 @@ public final class Fixture {
         return (current.exists() ? 1 : 0) + (current.isDirectory() ? 2 : 0)
             + (fixture.isFile() ? 4 : 0) + (fixture.length() > 0 ? 8 : 0);
     }
+    public static int fileExtendedValue() {
+        File fixture = new File("loader/build/Fixture.class");
+        File[] files = new File("loader/build").listFiles();
+        return fixture.getName().equals("Fixture.class")
+            && fixture.getParent().equals("loader/build")
+            && fixture.toPath().toString().equals("loader/build/Fixture.class")
+            && files != null && files.length > 0 ? 1 : 0;
+    }
     public static int streamValue() throws Exception {
         FileInputStream stream = new FileInputStream("loader/build/Fixture.class");
         int first = stream.read();
