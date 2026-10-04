@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.DirectoryStream;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
@@ -128,6 +130,15 @@ public final class Fixture {
         int a = input.read(), b = input.read(), c = input.read(), d = input.read();
         input.close();
         zip.close();
+        return entry != null && a == 0xca && b == 0xfe && c == 0xba && d == 0xbe ? 1 : 0;
+    }
+    public static int jarValue() throws Exception {
+        JarFile jar = new JarFile("loader/build/fixture.jar");
+        JarEntry entry = jar.getJarEntry("Fixture.class");
+        InputStream input = jar.getInputStream(entry);
+        int a = input.read(), b = input.read(), c = input.read(), d = input.read();
+        input.close();
+        jar.close();
         return entry != null && a == 0xca && b == 0xfe && c == 0xba && d == 0xbe ? 1 : 0;
     }
     public static int resourceValue() throws Exception {

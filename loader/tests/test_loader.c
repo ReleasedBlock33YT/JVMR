@@ -324,6 +324,10 @@ static void test_class_file(const char *path) {
 			"Java ZipFile and ZipEntry methods execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"Java ZipFile streams return archive entry bytes");
+		CHECK(jvmr_execute_class_method(&klass, "jarValue", "()I") == 0,
+			"Java JarFile and JarEntry methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"Java JarFile streams return archive entry bytes");
 		CHECK(jvmr_execute_class_method(&klass, "resourceValue", "()I") == 0,
 			"Class resource streams execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
