@@ -320,6 +320,18 @@ static void test_class_file(const char *path) {
 			"Java NIO directory and write methods execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"Java NIO writeString and readString round-trip host data");
+		CHECK(jvmr_execute_class_method(&klass, "zipValue", "()I") == 0,
+			"Java ZipFile and ZipEntry methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"Java ZipFile streams return archive entry bytes");
+		CHECK(jvmr_execute_class_method(&klass, "resourceValue", "()I") == 0,
+			"Class resource streams execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"Class resource streams return classpath bytes");
+		CHECK(jvmr_execute_class_method(&klass, "stringExtendedValue", "()I") == 0,
+			"extended String operations execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"String search, replacement, trimming, concatenation, and conversion work");
 		CHECK(jvmr_execute_class_method(&klass, "identityValue", "()I") == 0,
 			"identityHashCode executes for managed objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

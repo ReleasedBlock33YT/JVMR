@@ -107,6 +107,40 @@ static int run_classpath(int argc, char **argv) {
 	return result == 0 ? JVM_SUCCESS : INIT_FAIL;
 }
 
+static int run_jar(int argc, char **argv) {
+	if (argc < 2) return INIT_FAIL;
+	JVMR_ClassLoader *loader=jvmr_classloader_create();
+	if (!loader || jvmr_classloader_add_path(loader,argv[1])) { jvmr_classloader_destroy(loader); return INIT_FAIL; }
+	const char *java_home=getenv("JAVA_HOME");
+	if (!java_home) java_home="/usr/lib/jvm/java-21-openjdk-amd64";
+	(void)jvmr_classloader_add_java_runtime(loader,java_home);
+	uint8_t *manifest=NULL; size_t manifest_size=0;
+	if (jvmr_classloader_read_resource(loader,"META-INF/MANIFEST.MF",&manifest,&manifest_size)) { fprintf(stderr,"[JVMR/ERROR] executable JAR has no manifest.\n"); jvmr_classloader_destroy(loader); return INIT_FAIL; }
+	char main_class[1024]={0};
+	const char *key="Main-Class:";
+	for (size_t i=0;i+strlen(key)<=manifest_size;i++) if ((i==0||manifest[i-1]=='\n')&&!memcmp(manifest+i,key,strlen(key))) {
+		size_t start=i+strlen(key); while (start<manifest_size&&(manifest[start]==' '||manifest[start]=='\t')) start++;
+		size_t end=start; while (end<manifest_size&&manifest[end]!='\r'&&manifest[end]!='\n') end++;
+		if (end-start>=sizeof(main_class)) { free(manifest); jvmr_classloader_destroy(loader); return INIT_FAIL; }
+		memcpy(main_class,manifest+start,end-start); main_class[end-start]=0; break;
+	}
+	free(manifest);
+	if (!main_class[0]) { fprintf(stderr,"[JVMR/ERROR] executable JAR manifest has no Main-Class.\n"); jvmr_classloader_destroy(loader); return INIT_FAIL; }
+	for (char *p=main_class;*p;p++) if (*p=='.') *p='/';
+	const JVMR_Class *klass=jvmr_classloader_load(loader,main_class,NULL,0);
+	if (!klass) { fprintf(stderr,"[JVMR/ERROR] executable JAR main class %s was not found.\n",main_class); jvmr_classloader_destroy(loader); return INIT_FAIL; }
+	jvmr_runtime_set_classloader(loader);
+	int argument_count=argc>2?argc-2:0;
+	int array=jvmr_heap_new_array(JVMR_HEAP_REF_ARRAY,argument_count);
+	if (array<0) { jvmr_runtime_set_classloader(NULL); jvmr_classloader_destroy(loader); return INIT_FAIL; }
+	for (int i=0;i<argument_count;i++) { int string=jvmr_heap_new_string((const uint8_t *)argv[i+2],(uint16_t)strlen(argv[i+2]),klass); if (string<0||jvmr_heap_array_store((uint64_t)array,i,(uint64_t)string)) { jvmr_runtime_set_classloader(NULL); jvmr_classloader_destroy(loader); return INIT_FAIL; } }
+	uint64_t arguments[1]={(uint64_t)array};
+	int result=jvmr_execute_class_method_args(klass,"main","([Ljava/lang/String;)V",arguments,1);
+	if (result) fprintf(stderr,"[JVMR/ERROR] executable JAR main method failed.\n");
+	jvmr_runtime_set_classloader(NULL); jvmr_classloader_destroy(loader);
+	return result?INIT_FAIL:JVM_SUCCESS;
+}
+
 int main(int argc, char *argv[]) {
 	// JVM initializer
 	int bci = bytecode_init();
@@ -114,6 +148,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "FATAL: Bytecode initialization failed.\n       Check Earlier logs.\n");
 		return INIT_FAIL;
 	}
+	if (argc >= 3 && !strcmp(argv[1], "--jar")) return run_jar(argc-1,argv+1);
 	if (argc >= 4 && !strcmp(argv[1], "--cp")) return run_classpath(argc, argv);
 	if (argc >= 3) return run_class_file(argc,argv,argv[1], argv[2], argc >= 4 ? argv[3] : "()I");
 

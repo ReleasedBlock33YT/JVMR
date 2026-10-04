@@ -27,5 +27,6 @@ int jvmr_runtime_field_offset(const JVMR_Class *object_class, const JVMR_Class *
 int jvmr_invoke_reflected(const JVMR_Class *declaring_class, const JVMR_Method *method, uint64_t receiver, const uint64_t *arguments, uint16_t argument_count);
 int jvmr_runtime_is_instance(uint64_t reference, const JVMR_Class *target);
 int jvmr_ensure_initialized(const JVMR_Class *klass);
+int jvmr_runtime_read_resource(const char *name, uint8_t **data, size_t *size);
 
 #endif

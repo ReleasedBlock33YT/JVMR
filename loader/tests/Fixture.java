@@ -7,6 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
+import java.io.InputStream;
 import java.util.function.IntUnaryOperator;
 
 public final class Fixture {
@@ -114,6 +117,26 @@ public final class Fixture {
         Files.createDirectories(directory);
         Files.writeString(file, "jvmr");
         return Files.readString(file).equals("jvmr") ? 1 : 0;
+    }
+    public static int zipValue() throws Exception {
+        ZipFile zip = new ZipFile("loader/build/fixture.jar");
+        ZipEntry entry = zip.getEntry("Fixture.class");
+        InputStream input = zip.getInputStream(entry);
+        int a = input.read(), b = input.read(), c = input.read(), d = input.read();
+        input.close();
+        zip.close();
+        return entry != null && a == 0xca && b == 0xfe && c == 0xba && d == 0xbe ? 1 : 0;
+    }
+    public static int resourceValue() throws Exception {
+        InputStream input = Fixture.class.getResourceAsStream("/Fixture.class");
+        int a = input.read(), b = input.read(), c = input.read(), d = input.read();
+        input.close();
+        return a == 0xca && b == 0xfe && c == 0xba && d == 0xbe ? 1 : 0;
+    }
+    public static int stringExtendedValue() {
+        String value = "  fabric-loader-1.21  ".trim().replace("loader", "runtime").concat("!");
+        return value.equals("fabric-runtime-1.21!") && value.lastIndexOf("21") == 17
+            && value.getBytes().length == value.toCharArray().length ? 1 : 0;
     }
     public static int argLength(String[] args) {
         return args.length;
