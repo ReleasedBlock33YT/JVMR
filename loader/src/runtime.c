@@ -128,6 +128,7 @@ int jvmr_invoke_interface(uint16_t constant_pool_index) {
 		if(!strcmp(name,"getHandle")&&!strcmp(descriptor,"(Ljava/io/FileDescriptor;)J")){current_frame.sp-=arguments+1;current_frame.stack[current_frame.sp++]=0;return 0;}
 		if(!strcmp(name,"set")||!strcmp(name,"setAppend")||!strcmp(name,"close")||!strcmp(name,"registerCleanup")||!strcmp(name,"unregisterCleanup")||!strcmp(name,"setHandle")){current_frame.sp-=arguments+1;if(descriptor[strlen(descriptor)-1]=='V')return 0;}
 	}
+	if(owner_name&&(!strcmp(owner_name,"java/nio/file/DirectoryStream")||!strcmp(owner_name,"java/io/Closeable")||!strcmp(owner_name,"java/lang/AutoCloseable"))&&!strcmp(name,"close")&&!strcmp(descriptor,"()V")){current_frame.sp-=arguments+1;return 0;}
 	const JVMR_Class *native_owner=owner_name&&runtime_loader?jvmr_classloader_load(runtime_loader,owner_name,NULL,0):implementation_class;
 	const JVMR_Method *native_method=method;
 	if(!native_method&&native_owner)native_method=jvmr_class_find_method(native_owner,name,descriptor);

@@ -344,6 +344,10 @@ static void test_class_file(const char *path) {
 			"NIO stream factories execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"NIO input and output streams round-trip host bytes");
+		CHECK(jvmr_execute_class_method(&klass, "directoryValue", "()I") == 0,
+			"NIO directory streams execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"NIO directory iteration finds a classpath entry");
 		CHECK(jvmr_execute_class_method(&klass, "identityValue", "()I") == 0,
 			"identityHashCode executes for managed objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

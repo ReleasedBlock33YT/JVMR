@@ -7,10 +7,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.DirectoryStream;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.function.IntUnaryOperator;
 
 public final class Fixture {
@@ -161,6 +163,14 @@ public final class Fixture {
         output.close();
         byte[] bytes = Files.readAllBytes(outputPath);
         return a == 0xca && b == 0xfe && bytes.length == 3 && bytes[2] == 6 ? 1 : 0;
+    }
+    public static int directoryValue() throws Exception {
+        DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of("loader/build"));
+        Iterator<Path> iterator = stream.iterator();
+        boolean found = false;
+        while (iterator.hasNext()) if (iterator.next().getFileName().toString().equals("Fixture.class")) found = true;
+        stream.close();
+        return found ? 1 : 0;
     }
     public static int argLength(String[] args) {
         return args.length;
