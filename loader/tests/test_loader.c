@@ -356,6 +356,10 @@ static void test_class_file(const char *path) {
 			"NIO directory streams execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"NIO directory iteration finds a classpath entry");
+		CHECK(jvmr_execute_class_method(&klass, "nioMutationValue", "()I") == 0,
+			"NIO file mutation methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"NIO create, copy, move, delete, and cleanup operations work");
 		CHECK(jvmr_execute_class_method(&klass, "identityValue", "()I") == 0,
 			"identityHashCode executes for managed objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

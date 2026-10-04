@@ -191,6 +191,21 @@ public final class Fixture {
         stream.close();
         return found ? 1 : 0;
     }
+    public static int nioMutationValue() throws Exception {
+        Path directory = Path.of("loader/build/jvmr-mutation");
+        Path source = directory.resolve("source.bin");
+        Path copy = directory.resolve("copy.bin");
+        Files.createDirectories(directory);
+        Files.writeString(source, "mutation");
+        Files.copy(source, copy);
+        boolean copied = Files.readString(copy).equals("mutation");
+        Files.deleteIfExists(source);
+        Files.move(copy, source);
+        boolean moved = Files.exists(source);
+        Files.deleteIfExists(source);
+        Files.deleteIfExists(directory);
+        return copied && moved && !Files.exists(source) ? 1 : 0;
+    }
     public static int argLength(String[] args) {
         return args.length;
     }
