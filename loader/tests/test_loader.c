@@ -332,6 +332,10 @@ static void test_class_file(const char *path) {
 			"extended String operations execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"String search, replacement, trimming, concatenation, and conversion work");
+		CHECK(jvmr_execute_class_method(&klass, "classLoaderValue", "()I") == 0,
+			"context ClassLoader lookup executes");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"context ClassLoader resolves an application class");
 		CHECK(jvmr_execute_class_method(&klass, "identityValue", "()I") == 0,
 			"identityHashCode executes for managed objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

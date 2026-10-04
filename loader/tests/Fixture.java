@@ -138,6 +138,10 @@ public final class Fixture {
         return value.equals("fabric-runtime-1.21!") && value.lastIndexOf("21") == 17
             && value.getBytes().length == value.toCharArray().length ? 1 : 0;
     }
+    public static int classLoaderValue() throws Exception {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return loader != null && loader.loadClass("Fixture") == Fixture.class ? 1 : 0;
+    }
     public static int argLength(String[] args) {
         return args.length;
     }
