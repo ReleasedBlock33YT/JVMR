@@ -74,6 +74,13 @@ public final class Fixture {
         return (home.length() > 0 ? 1 : 0) + (encoding.equals("UTF-8") ? 2 : 0)
             + (System.getenv("JVMR_TEST_MISSING") == null ? 4 : 0);
     }
+    public static int propertiesValue() {
+        java.util.Properties properties = System.getProperties();
+        String original = properties.getProperty("java.version");
+        properties.setProperty("jvmr.test", "ok");
+        return ("21".equals(original) ? 1 : 0)
+            + ("ok".equals(properties.getProperty("jvmr.test")) ? 2 : 0);
+    }
     public static int platformLibraryValue() {
         return System.mapLibraryName("jvmr").endsWith(".so") ? 1 : 0;
     }
