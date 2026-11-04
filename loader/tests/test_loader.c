@@ -482,6 +482,10 @@ static void test_class_file(const char *path) {
 			"Object equals and toString execute for inherited methods");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 111,
 			"Object identity and diagnostic text preserve expected semantics");
+		CHECK(jvmr_execute_class_method(&klass, "nioListStreamValue", "()I") == 0,
+			"Files.list and Stream iterator traversal execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"NIO stream traversal finds the compiled fixture");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;

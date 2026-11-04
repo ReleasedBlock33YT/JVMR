@@ -382,6 +382,18 @@ public final class Fixture {
             + (!first.equals(second) ? 10 : 0)
             + (first.toString().startsWith("Fixture@") ? 100 : 0);
     }
+    public static int nioListStreamValue() throws Exception {
+        java.util.stream.Stream<Path> stream = Files.list(Path.of("loader/build"));
+        Iterator<Path> iterator = stream.iterator();
+        int found = 0;
+        while (iterator.hasNext()) {
+            if (iterator.next().getFileName().toString().equals("Fixture.class")) {
+                found++;
+            }
+        }
+        stream.close();
+        return found;
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
