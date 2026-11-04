@@ -28,5 +28,6 @@ int jvmr_invoke_reflected(const JVMR_Class *declaring_class, const JVMR_Method *
 int jvmr_runtime_is_instance(uint64_t reference, const JVMR_Class *target);
 int jvmr_ensure_initialized(const JVMR_Class *klass);
 int jvmr_runtime_read_resource(const char *name, uint8_t **data, size_t *size);
+int jvmr_runtime_read_resources(const char *name, uint8_t **data, size_t *size);
 
 #endif

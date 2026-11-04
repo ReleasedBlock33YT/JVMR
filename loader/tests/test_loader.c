@@ -498,6 +498,10 @@ static void test_class_file(const char *path) {
 			"ServiceLoader discovers providers from META-INF/services");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 37,
 			"ServiceLoader instantiates and invokes the discovered provider");
+		CHECK(jvmr_execute_class_method(&klass, "serviceLoaderWithClassLoaderValue", "()I") == 0,
+			"ServiceLoader accepts an explicit context class loader");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 37,
+			"explicit ServiceLoader class-loader lookup discovers the provider");
 		CHECK(jvmr_execute_class_method(&klass, "nioListStreamValue", "()I") == 0,
 			"Files.list and Stream iterator traversal execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

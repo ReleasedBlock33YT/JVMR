@@ -255,3 +255,4 @@ int jvmr_runtime_is_instance(uint64_t reference, const JVMR_Class *target) {
 }
 void jvmr_runtime_set_classloader(JVMR_ClassLoader *loader) { runtime_loader=loader; if(loader){const JVMR_Class *klass=jvmr_classloader_load(loader,"java/lang/String",NULL,0);jvmr_heap_set_string_class(klass);} }
 int jvmr_runtime_read_resource(const char *name,uint8_t **data,size_t *size){return jvmr_classloader_read_resource(runtime_loader,name,data,size);}
+int jvmr_runtime_read_resources(const char *name,uint8_t **data,size_t *size){return jvmr_classloader_read_resources(runtime_loader,name,data,size);}

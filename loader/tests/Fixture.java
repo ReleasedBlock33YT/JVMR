@@ -410,6 +410,12 @@ public final class Fixture {
         Iterator<Service> iterator = loader.iterator();
         return iterator.hasNext() ? iterator.next().value() : 0;
     }
+    public static int serviceLoaderWithClassLoaderValue() {
+        java.util.ServiceLoader<Service> loader = java.util.ServiceLoader.load(
+            Service.class, Thread.currentThread().getContextClassLoader());
+        Iterator<Service> iterator = loader.iterator();
+        return iterator.hasNext() ? iterator.next().value() : 0;
+    }
     public static int nioListStreamValue() throws Exception {
         java.util.stream.Stream<Path> stream = Files.list(Path.of("loader/build"));
         Iterator<Path> iterator = stream.iterator();
