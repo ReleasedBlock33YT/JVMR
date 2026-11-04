@@ -375,6 +375,13 @@ public final class Fixture {
         Point point = new Point(7, 5);
         return point.x() * 10 + point.y();
     }
+    public static int objectMethodsValue() {
+        Fixture first = new Fixture();
+        Fixture second = new Fixture();
+        return (first.equals(first) ? 1 : 0)
+            + (!first.equals(second) ? 10 : 0)
+            + (first.toString().startsWith("Fixture@") ? 100 : 0);
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
