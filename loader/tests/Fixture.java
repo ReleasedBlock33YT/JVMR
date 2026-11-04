@@ -300,6 +300,15 @@ public final class Fixture {
             + (mode.toString().equals("BETA") ? 100 : 0)
             + (Mode.valueOf("ALPHA").ordinal() == 0 ? 1000 : 0);
     }
+    public static int collectionsValue() {
+        java.util.ArrayList<String> list = new java.util.ArrayList<>();
+        list.add("first");
+        list.add("second");
+        java.util.HashMap<String, Integer> map = new java.util.HashMap<>();
+        map.put("answer", 42);
+        return list.size() + (list.get(1).equals("second") ? 10 : 0)
+            + map.get("answer") + (map.containsKey("answer") ? 100 : 0);
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
