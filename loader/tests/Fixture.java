@@ -306,8 +306,17 @@ public final class Fixture {
         list.add("second");
         java.util.HashMap<String, Integer> map = new java.util.HashMap<>();
         map.put("answer", 42);
-        return list.size() + (list.get(1).equals("second") ? 10 : 0)
+        int total = 0;
+        for (String value : list) {
+            total += value.length();
+        }
+        return list.size() + total + (list.get(1).equals("second") ? 10 : 0)
             + map.get("answer") + (map.containsKey("answer") ? 100 : 0);
+    }
+    public static int setValue() {
+        java.util.HashSet<String> set = new java.util.HashSet<>();
+        return (set.add("one") ? 1 : 0) + (set.add("one") ? 10 : 0)
+            + (set.contains("one") ? 100 : 0) + set.size();
     }
     public static String concatValue() {
         return "value=" + 7;

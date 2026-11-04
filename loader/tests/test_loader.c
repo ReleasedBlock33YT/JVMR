@@ -440,8 +440,12 @@ static void test_class_file(const char *path) {
 			"enum name, ordinal, toString, values, and valueOf preserve Java semantics");
 		CHECK(jvmr_execute_class_method(&klass, "collectionsValue", "()I") == 0,
 			"ArrayList and HashMap construction and lookup execute");
-		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 154,
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 165,
 			"ArrayList and HashMap preserve collection values");
+		CHECK(jvmr_execute_class_method(&klass, "setValue", "()I") == 0,
+			"HashSet construction and membership execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 102,
+			"HashSet suppresses duplicate values and reports membership");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;
