@@ -353,6 +353,19 @@ public final class Fixture {
         return list.size() + list.get(1).length() * 10 + set.size() * 100
             + map.get("n");
     }
+    public static int collectionsUtilityValue() {
+        java.util.List<String> list = java.util.Collections.singletonList("x");
+        java.util.Set<String> set = java.util.Collections.singleton("y");
+        java.util.Map<String, Integer> map = java.util.Collections.singletonMap("n", 3);
+        return list.size() + set.size() * 10 + map.get("n")
+            + java.util.Collections.emptyList().size()
+            + (java.util.Collections.unmodifiableList(list) == list ? 100 : 0);
+    }
+    public static int concurrentMapValue() {
+        java.util.concurrent.ConcurrentHashMap<String, Integer> map = new java.util.concurrent.ConcurrentHashMap<>();
+        map.put("value", 9);
+        return map.get("value") + map.size() + (map.containsKey("value") ? 100 : 0);
+    }
     public static String concatValue() {
         return "value=" + 7;
     }

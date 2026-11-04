@@ -462,6 +462,14 @@ static void test_class_file(const char *path) {
 			"List.of, Set.of, and Map.of execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 229,
 			"collection factories preserve immutable-factory contents");
+		CHECK(jvmr_execute_class_method(&klass, "collectionsUtilityValue", "()I") == 0,
+			"Collections singleton, empty, and wrapper methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 114,
+			"Collections utility methods preserve collection contents");
+		CHECK(jvmr_execute_class_method(&klass, "concurrentMapValue", "()I") == 0,
+			"ConcurrentHashMap construction and lookup execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 110,
+			"ConcurrentHashMap preserves map values and membership");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;
