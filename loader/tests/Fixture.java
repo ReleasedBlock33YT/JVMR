@@ -397,6 +397,14 @@ public final class Fixture {
             + (String.valueOf(12L).equals("12") ? 10 : 0)
             + (builder.toString().startsWith("Fixture@") ? 100 : 0);
     }
+    public static int collectionCopyValue() {
+        java.util.List<String> list = java.util.List.of("a");
+        java.util.Set<String> set = java.util.Set.of("b");
+        java.util.Map<String, Integer> map = java.util.Map.of("n", 2);
+        return java.util.List.copyOf(list).size()
+            + java.util.Set.copyOf(set).size() * 10
+            + java.util.Map.copyOf(map).get("n") * 100;
+    }
     public static int nioListStreamValue() throws Exception {
         java.util.stream.Stream<Path> stream = Files.list(Path.of("loader/build"));
         Iterator<Path> iterator = stream.iterator();

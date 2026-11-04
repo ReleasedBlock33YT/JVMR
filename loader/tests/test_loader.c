@@ -490,6 +490,10 @@ static void test_class_file(const char *path) {
 			"String.valueOf and StringBuilder object conversion execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 111,
 			"String object conversion preserves null, numeric, and object text");
+		CHECK(jvmr_execute_class_method(&klass, "collectionCopyValue", "()I") == 0,
+			"List.copyOf, Set.copyOf, and Map.copyOf execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 211,
+			"collection copy factories preserve source contents");
 		CHECK(jvmr_execute_class_method(&klass, "nioListStreamValue", "()I") == 0,
 			"Files.list and Stream iterator traversal execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
