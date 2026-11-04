@@ -474,6 +474,10 @@ static void test_class_file(const char *path) {
 			"AtomicInteger construction and increments execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 16,
 			"AtomicInteger preserves counter values");
+		CHECK(jvmr_execute_class_method(&klass, "recordValue", "()I") == 0,
+			"Java 21 record construction and accessors execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 75,
+			"Java 21 record components preserve their values");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;

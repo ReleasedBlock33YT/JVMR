@@ -371,6 +371,10 @@ public final class Fixture {
         int old = counter.getAndIncrement();
         return old + counter.incrementAndGet() + counter.get();
     }
+    public static int recordValue() {
+        Point point = new Point(7, 5);
+        return point.x() * 10 + point.y();
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
