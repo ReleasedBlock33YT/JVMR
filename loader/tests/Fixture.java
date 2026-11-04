@@ -78,8 +78,13 @@ public final class Fixture {
         java.util.Properties properties = System.getProperties();
         String original = properties.getProperty("java.version");
         properties.setProperty("jvmr.test", "ok");
+        System.setProperty("jvmr.system.test", "yes");
+        String set = System.getProperty("jvmr.system.test");
+        String cleared = System.clearProperty("jvmr.system.test");
         return ("21".equals(original) ? 1 : 0)
-            + ("ok".equals(properties.getProperty("jvmr.test")) ? 2 : 0);
+            + ("ok".equals(properties.getProperty("jvmr.test")) ? 2 : 0)
+            + ("yes".equals(set) && "yes".equals(cleared) ? 4 : 0)
+            + (System.getProperty("jvmr.system.test") == null ? 8 : 0);
     }
     public static int platformLibraryValue() {
         return System.mapLibraryName("jvmr").endsWith(".so") ? 1 : 0;
