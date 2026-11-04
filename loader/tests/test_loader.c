@@ -486,6 +486,10 @@ static void test_class_file(const char *path) {
 			"Objects null, equality, and hash helpers execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 11111,
 			"Objects utility methods preserve expected results");
+		CHECK(jvmr_execute_class_method(&klass, "valueOfValue", "()I") == 0,
+			"String.valueOf and StringBuilder object conversion execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 111,
+			"String object conversion preserves null, numeric, and object text");
 		CHECK(jvmr_execute_class_method(&klass, "nioListStreamValue", "()I") == 0,
 			"Files.list and Stream iterator traversal execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

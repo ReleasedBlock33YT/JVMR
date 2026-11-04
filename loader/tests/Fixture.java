@@ -390,6 +390,13 @@ public final class Fixture {
             + (java.util.Objects.nonNull(value) ? 1000 : 0)
             + (java.util.Objects.hashCode(value) != 0 ? 10000 : 0);
     }
+    public static int valueOfValue() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(new Fixture());
+        return (String.valueOf((Object) null).equals("null") ? 1 : 0)
+            + (String.valueOf(12L).equals("12") ? 10 : 0)
+            + (builder.toString().startsWith("Fixture@") ? 100 : 0);
+    }
     public static int nioListStreamValue() throws Exception {
         java.util.stream.Stream<Path> stream = Files.list(Path.of("loader/build"));
         Iterator<Path> iterator = stream.iterator();
