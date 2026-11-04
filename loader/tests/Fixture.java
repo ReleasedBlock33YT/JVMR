@@ -318,6 +318,20 @@ public final class Fixture {
         return (set.add("one") ? 1 : 0) + (set.add("one") ? 10 : 0)
             + (set.contains("one") ? 100 : 0) + set.size();
     }
+    public static int collectionMutationValue() {
+        java.util.ArrayList<String> list = new java.util.ArrayList<>();
+        list.add("old");
+        list.set(0, "new");
+        int result = list.contains("new") ? 1 : 0;
+        result += list.remove(0).equals("new") ? 10 : 0;
+        java.util.HashMap<String, Integer> map = new java.util.HashMap<>();
+        map.put("x", 7);
+        result += map.remove("x");
+        java.util.HashSet<String> set = new java.util.HashSet<>();
+        set.add("x");
+        result += set.remove("x") ? 100 : 0;
+        return result;
+    }
     public static String concatValue() {
         return "value=" + 7;
     }

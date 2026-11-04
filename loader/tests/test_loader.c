@@ -446,6 +446,10 @@ static void test_class_file(const char *path) {
 			"HashSet construction and membership execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 102,
 			"HashSet suppresses duplicate values and reports membership");
+		CHECK(jvmr_execute_class_method(&klass, "collectionMutationValue", "()I") == 0,
+			"collection replacement and removal operations execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 118,
+			"collection mutation operations preserve values");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;
