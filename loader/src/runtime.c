@@ -97,6 +97,8 @@ int jvmr_invoke_static(uint16_t constant_pool_index) {
 
 int jvmr_invoke_instance(uint16_t constant_pool_index) {
 	if (!runtime_class) { current_frame.pc=UINT32_MAX; return -1; }
+	const char *array_owner=NULL,*array_name=NULL,*array_descriptor=NULL;
+	if(!reference_info(constant_pool_index,&array_owner,&array_name,&array_descriptor)&&array_name&&array_descriptor&&!strcmp(array_name,"clone")&&!strcmp(array_descriptor,"()Ljava/lang/Object;")){uint64_t receiver=current_frame.stack[--current_frame.sp];int copy=jvmr_heap_clone_array(receiver);if(copy>=0){current_frame.stack[current_frame.sp++]=(uint64_t)copy;return 0;}current_frame.stack[current_frame.sp++]=receiver;}
 	const JVMR_Class *owner_class; const char *name=NULL,*descriptor=NULL; const JVMR_Method *method=resolve_method(constant_pool_index,&owner_class,&name,&descriptor);
 	int arguments=descriptor_arguments(method?method->descriptor:NULL);
 	if(!method||arguments<0||current_frame.sp<arguments+1||call_depth>=JVMR_CALL_STACK_MAX){ fprintf(stderr,"[JVMR/ERROR] cannot resolve instance method #%u.\n",constant_pool_index); current_frame.pc=UINT32_MAX; return -1; }

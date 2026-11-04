@@ -293,6 +293,15 @@ public final class Fixture {
         builder.append('x').append(true).append(':').append(9L).append(':').append((CharSequence) "ok");
         return builder.toString().equals("xtrue:9:ok") ? 1 : 0;
     }
+    public static int enumValue() {
+        Mode mode = Mode.BETA;
+        return mode.ordinal() + (mode.name().equals("BETA") ? 10 : 0)
+            + (Mode.values().length == 2 ? 1 : 0)
+            + (mode.toString().equals("BETA") ? 100 : 0);
+    }
+    public static int enumOrdinalOnly() { return Mode.BETA.ordinal(); }
+    public static int enumNameOnly() { return Mode.BETA.name().length(); }
+    public static int enumValuesOnly() { return Mode.values().length; }
     public static String concatValue() {
         return "value=" + 7;
     }

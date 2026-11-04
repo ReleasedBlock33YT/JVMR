@@ -434,6 +434,10 @@ static void test_class_file(const char *path) {
 			"StringBuilder primitive and CharSequence overloads execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"StringBuilder overloads preserve the expected text");
+		CHECK(jvmr_execute_class_method(&klass, "enumValue", "()I") == 0,
+			"enum construction, values, and inherited methods execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 112,
+			"enum name, ordinal, toString, and values preserve Java semantics");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;
