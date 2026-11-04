@@ -14,10 +14,12 @@ void handler_checkcast(void) {
 	uint16_t index=(uint16_t)((fetch_bytecode()<<8)|fetch_bytecode());
 	uint64_t reference=current_frame.stack[current_frame.sp-1];
 	const JVMR_Class *target=jvmr_runtime_resolve_class(index);
-	if (reference && (!target || !jvmr_runtime_is_instance(reference,target))) jvmr_throw_named("java/lang/ClassCastException");
+	int array_match=0;int32_t length=0;if(reference&&((target&&target->name&&target->name[0]=='[')||!target))array_match=jvmr_heap_array_length(reference,&length)==0;
+	if (reference && ((!target&&!array_match)||(target&&!array_match&&!jvmr_runtime_is_instance(reference,target)))) jvmr_throw_named("java/lang/ClassCastException");
 }
 void handler_instanceof(void) {
 	uint16_t index=(uint16_t)((fetch_bytecode()<<8)|fetch_bytecode());
 	uint64_t reference=current_frame.stack[--current_frame.sp];
-	current_frame.stack[current_frame.sp++]=(uint64_t)(reference && jvmr_runtime_is_instance(reference,jvmr_runtime_resolve_class(index)));
+	const JVMR_Class *target=jvmr_runtime_resolve_class(index);int array_match=0;int32_t length=0;if(reference&&((target&&target->name&&target->name[0]=='[')||!target))array_match=jvmr_heap_array_length(reference,&length)==0;
+	current_frame.stack[current_frame.sp++]=(uint64_t)(reference && (array_match||jvmr_runtime_is_instance(reference,target)));
 }

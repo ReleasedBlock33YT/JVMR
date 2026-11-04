@@ -297,11 +297,9 @@ public final class Fixture {
         Mode mode = Mode.BETA;
         return mode.ordinal() + (mode.name().equals("BETA") ? 10 : 0)
             + (Mode.values().length == 2 ? 1 : 0)
-            + (mode.toString().equals("BETA") ? 100 : 0);
+            + (mode.toString().equals("BETA") ? 100 : 0)
+            + (Mode.valueOf("ALPHA").ordinal() == 0 ? 1000 : 0);
     }
-    public static int enumOrdinalOnly() { return Mode.BETA.ordinal(); }
-    public static int enumNameOnly() { return Mode.BETA.name().length(); }
-    public static int enumValuesOnly() { return Mode.values().length; }
     public static String concatValue() {
         return "value=" + 7;
     }
