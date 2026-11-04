@@ -454,6 +454,10 @@ static void test_class_file(const char *path) {
 			"collection replacement and removal operations execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 118,
 			"collection mutation operations preserve values");
+		CHECK(jvmr_execute_class_method(&klass, "optionalValue", "()I") == 0,
+			"Optional construction and presence operations execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1111,
+			"Optional preserves present and fallback values");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;

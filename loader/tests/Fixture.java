@@ -339,6 +339,13 @@ public final class Fixture {
         result += set.remove("x") ? 100 : 0;
         return result;
     }
+    public static int optionalValue() {
+        java.util.Optional<String> present = java.util.Optional.of("yes");
+        java.util.Optional<String> empty = java.util.Optional.empty();
+        return (present.isPresent() ? 1 : 0) + (empty.isEmpty() ? 10 : 0)
+            + (present.get().equals("yes") ? 100 : 0)
+            + (empty.orElse("fallback").equals("fallback") ? 1000 : 0);
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
