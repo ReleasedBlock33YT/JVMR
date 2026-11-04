@@ -136,14 +136,14 @@ int jvmr_invoke_interface(uint16_t constant_pool_index) {
 	const JVMR_Method *native_method=method;
 	if(!native_method&&native_owner)native_method=jvmr_class_find_method(native_owner,name,descriptor);
 	if(jvmr_native_invoke(native_owner,native_method,0)==0)return 0;
-	if(!method||!method->code){fprintf(stderr,"[JVMR/ERROR] interface method %s%s has no concrete implementation.\n",name,descriptor);current_frame.pc=UINT32_MAX;return -1;}
+	if(!method||!method->code){fprintf(stderr,"[JVMR/ERROR] interface method %s%s\\n",name,descriptor);current_frame.pc=UINT32_MAX;return -1;}
 	int caller_sp=current_frame.sp;call_stack[call_depth++]=(SavedFrame){current_frame,runtime_method,runtime_class,0,NULL};SavedFrame *saved=&call_stack[call_depth-1];saved->frame.sp-=arguments+1;JVMR_Frame callee;memset(&callee,0,sizeof(callee));callee.code=(uint8_t*)method->code;callee.code_length=method->code_length;int local=0;if(!lambda||!(method->access_flags&0x0008))callee.locals[local++]=receiver;if(lambda)for(uint16_t i=0;i<captured_count;i++)callee.locals[local++]=captured[i];for(int i=0;i<arguments;i++)callee.locals[local+i]=saved->frame.stack[caller_sp-arguments+i];current_frame=callee;runtime_method=method;runtime_class=implementation_class;return 0;
 }
 
 int jvmr_invoke_reflected(const JVMR_Class *declaring_class,const JVMR_Method *method,uint64_t receiver,const uint64_t *arguments,uint16_t argument_count) {
 	if(!declaring_class||!method||!method->code||argument_count>JVMR_LOCALS_MAX|| (argument_count&&!arguments)||call_depth>=JVMR_CALL_STACK_MAX)return -1;
 	int expected=descriptor_arguments(method->descriptor);if(expected<0||expected!=argument_count)return -1;
-	call_stack[call_depth++]=(SavedFrame){current_frame,runtime_method,runtime_class,1,method->descriptor};
+	const char *return_type=strchr(method->descriptor,')');call_stack[call_depth++]=(SavedFrame){current_frame,runtime_method,runtime_class,(uint8_t)(return_type&&return_type[1]!='V'),method->descriptor};
 	SavedFrame *saved=&call_stack[call_depth-1];saved->frame.sp-=0;
 	JVMR_Frame callee;memset(&callee,0,sizeof(callee));callee.code=(uint8_t *)method->code;callee.code_length=method->code_length;int local=0;if(!(method->access_flags&0x0008))callee.locals[local++]=receiver;for(uint16_t i=0;i<argument_count;i++)callee.locals[local+i]=arguments[i];
 	current_frame=callee;runtime_method=method;runtime_class=declaring_class;return 0;
