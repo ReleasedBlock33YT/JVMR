@@ -366,6 +366,11 @@ public final class Fixture {
         map.put("value", 9);
         return map.get("value") + map.size() + (map.containsKey("value") ? 100 : 0);
     }
+    public static int atomicValue() {
+        java.util.concurrent.atomic.AtomicInteger counter = new java.util.concurrent.atomic.AtomicInteger(4);
+        int old = counter.getAndIncrement();
+        return old + counter.incrementAndGet() + counter.get();
+    }
     public static String concatValue() {
         return "value=" + 7;
     }

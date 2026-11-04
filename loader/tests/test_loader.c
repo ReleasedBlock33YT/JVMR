@@ -470,6 +470,10 @@ static void test_class_file(const char *path) {
 			"ConcurrentHashMap construction and lookup execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 110,
 			"ConcurrentHashMap preserves map values and membership");
+		CHECK(jvmr_execute_class_method(&klass, "atomicValue", "()I") == 0,
+			"AtomicInteger construction and increments execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 16,
+			"AtomicInteger preserves counter values");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;
