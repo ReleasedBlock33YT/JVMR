@@ -66,6 +66,15 @@ void jvmr_heap_set_string_class(const struct JVMR_Class *klass) { if(klass&&klas
 int jvmr_heap_new_array(JVMR_HeapKind kind, int32_t length) {
 	return kind == JVMR_HEAP_PRIMITIVE_ARRAY || kind == JVMR_HEAP_INT_ARRAY || kind == JVMR_HEAP_REF_ARRAY ? allocate(kind, length, NULL) : -1;
 }
+int jvmr_heap_clone_array(uint64_t reference) {
+	HeapObject *source = lookup(reference);
+	if (!source || source->kind == JVMR_HEAP_OBJECT) return -1;
+	int result = allocate(source->kind, source->length, source->klass);
+	if (result < 0) return -1;
+	HeapObject *copy = lookup((uint64_t)result);
+	if (source->length > 0) memcpy(copy->elements, source->elements, (size_t)source->length * sizeof(*source->elements));
+	return result;
+}
 int jvmr_heap_array_length(uint64_t reference, int32_t *length) {
 	HeapObject *object = lookup(reference);
 	if (!object || object->kind == JVMR_HEAP_OBJECT || !length) return -1;

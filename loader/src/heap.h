@@ -21,6 +21,7 @@ int jvmr_heap_lambda_info(uint64_t reference, const struct JVMR_Class **implemen
 int jvmr_heap_new_string(const uint8_t *bytes, uint16_t length, const struct JVMR_Class *klass);
 void jvmr_heap_set_string_class(const struct JVMR_Class *klass);
 int jvmr_heap_new_array(JVMR_HeapKind kind, int32_t length);
+int jvmr_heap_clone_array(uint64_t reference);
 int jvmr_heap_array_length(uint64_t reference, int32_t *length);
 int jvmr_heap_array_load(uint64_t reference, int32_t index, uint64_t *value);
 int jvmr_heap_array_store(uint64_t reference, int32_t index, uint64_t value);

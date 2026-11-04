@@ -288,6 +288,11 @@ public final class Fixture {
     public static int builderRangeValue() {
         return new StringBuilder().append("abcdef", 1, 4).toString().equals("bcd") ? 1 : 0;
     }
+    public static int builderExtendedValue() {
+        StringBuilder builder = new StringBuilder();
+        builder.append('x').append(true).append(':').append(9L).append(':').append((CharSequence) "ok");
+        return builder.toString().equals("xtrue:9:ok") ? 1 : 0;
+    }
     public static String concatValue() {
         return "value=" + 7;
     }

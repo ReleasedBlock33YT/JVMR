@@ -430,6 +430,10 @@ static void test_class_file(const char *path) {
 			"StringBuilder range append executes");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"StringBuilder range append preserves the requested subsequence");
+		CHECK(jvmr_execute_class_method(&klass, "builderExtendedValue", "()I") == 0,
+			"StringBuilder primitive and CharSequence overloads execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"StringBuilder overloads preserve the expected text");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;
