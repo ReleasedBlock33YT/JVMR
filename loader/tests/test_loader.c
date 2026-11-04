@@ -482,6 +482,10 @@ static void test_class_file(const char *path) {
 			"Object equals and toString execute for inherited methods");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 111,
 			"Object identity and diagnostic text preserve expected semantics");
+		CHECK(jvmr_execute_class_method(&klass, "objectsUtilityValue", "()I") == 0,
+			"Objects null, equality, and hash helpers execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 11111,
+			"Objects utility methods preserve expected results");
 		CHECK(jvmr_execute_class_method(&klass, "nioListStreamValue", "()I") == 0,
 			"Files.list and Stream iterator traversal execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,

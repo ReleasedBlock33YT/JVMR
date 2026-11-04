@@ -382,6 +382,14 @@ public final class Fixture {
             + (!first.equals(second) ? 10 : 0)
             + (first.toString().startsWith("Fixture@") ? 100 : 0);
     }
+    public static int objectsUtilityValue() {
+        String value = "value";
+        return (java.util.Objects.requireNonNull(value) == value ? 1 : 0)
+            + (java.util.Objects.equals(value, "value") ? 10 : 0)
+            + (java.util.Objects.isNull(null) ? 100 : 0)
+            + (java.util.Objects.nonNull(value) ? 1000 : 0)
+            + (java.util.Objects.hashCode(value) != 0 ? 10000 : 0);
+    }
     public static int nioListStreamValue() throws Exception {
         java.util.stream.Stream<Path> stream = Files.list(Path.of("loader/build"));
         Iterator<Path> iterator = stream.iterator();
