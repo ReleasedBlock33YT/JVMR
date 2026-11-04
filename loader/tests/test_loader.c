@@ -422,6 +422,10 @@ static void test_class_file(const char *path) {
 			"common String search and slicing methods execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 22,
 			"String operations preserve Java text semantics");
+		CHECK(jvmr_execute_class_method(&klass, "stringTextExtendedValue", "()I") == 0,
+			"extended String operations execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1111,
+			"String comparison, blankness, and repetition preserve semantics");
 		CHECK(jvmr_execute_class_method(&klass, "builderLength", "()I") == 0,
 			"StringBuilder construction and chaining executes");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 6,

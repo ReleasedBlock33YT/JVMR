@@ -282,6 +282,13 @@ public final class Fixture {
             + (value.endsWith("ric") ? 1 : 0)
             + (value.toLowerCase().contains("craft") ? 1 : 0);
     }
+    public static int stringTextExtendedValue() {
+        String value = "  Fabric  ";
+        return (value.trim().equalsIgnoreCase("fabric") ? 1 : 0)
+            + ("abc".compareTo("abd") < 0 ? 10 : 0)
+            + ("   ".isBlank() ? 100 : 0)
+            + ("xy".repeat(2).equals("xyxy") ? 1000 : 0);
+    }
     public static int builderLength() {
         return new StringBuilder().append("abc").append(123).toString().length();
     }
@@ -290,8 +297,8 @@ public final class Fixture {
     }
     public static int builderExtendedValue() {
         StringBuilder builder = new StringBuilder();
-        builder.append('x').append(true).append(':').append(9L).append(':').append((CharSequence) "ok");
-        return builder.toString().equals("xtrue:9:ok") ? 1 : 0;
+        builder.append('x').append(true).append(':').append(9L).append(':').append(1.5f).append(':').append(2.5d).append(':').append((CharSequence) "ok");
+        return builder.toString().equals("xtrue:9:1.5:2.5:ok") ? 1 : 0;
     }
     public static int enumValue() {
         Mode mode = Mode.BETA;
