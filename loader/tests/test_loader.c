@@ -486,6 +486,10 @@ static void test_class_file(const char *path) {
 			"Files.list and Stream iterator traversal execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
 			"NIO stream traversal finds the compiled fixture");
+		CHECK(jvmr_execute_class_method(&klass, "nioWalkValue", "()I") == 0,
+			"Files.walk recursively enumerates nested paths");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1,
+			"NIO recursive traversal finds the nested marker");
 		CHECK(jvmr_execute_class_method(&klass, "concatValue", "()Ljava/lang/String;") == 0,
 			"invokedynamic string concatenation executes");
 		int32_t string_length=0;

@@ -394,6 +394,26 @@ public final class Fixture {
         stream.close();
         return found;
     }
+    public static int nioWalkValue() throws Exception {
+        Path root = Path.of("loader/build/jvmr-walk");
+        Path nested = root.resolve("nested");
+        Files.createDirectories(nested);
+        Path marker = nested.resolve("marker.txt");
+        Files.writeString(marker, "walk");
+        java.util.stream.Stream<Path> stream = Files.walk(root);
+        Iterator<Path> iterator = stream.iterator();
+        int found = 0;
+        while (iterator.hasNext()) {
+            if (iterator.next().getFileName().toString().equals("marker.txt")) {
+                found++;
+            }
+        }
+        stream.close();
+        Files.deleteIfExists(marker);
+        Files.deleteIfExists(nested);
+        Files.deleteIfExists(root);
+        return found;
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
