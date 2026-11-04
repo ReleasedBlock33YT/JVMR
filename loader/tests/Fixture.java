@@ -346,6 +346,13 @@ public final class Fixture {
             + (present.get().equals("yes") ? 100 : 0)
             + (empty.orElse("fallback").equals("fallback") ? 1000 : 0);
     }
+    public static int collectionFactoryValue() {
+        java.util.List<String> list = java.util.List.of("a", "bb");
+        java.util.Set<String> set = java.util.Set.of("x", "y");
+        java.util.Map<String, Integer> map = java.util.Map.of("n", 7);
+        return list.size() + list.get(1).length() * 10 + set.size() * 100
+            + map.get("n");
+    }
     public static String concatValue() {
         return "value=" + 7;
     }
