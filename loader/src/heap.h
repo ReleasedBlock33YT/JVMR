@@ -14,8 +14,12 @@ int jvmr_heap_new_class_mirror(const struct JVMR_Class *represented_class, const
 int jvmr_heap_class_mirror(uint64_t reference, const struct JVMR_Class **represented_class);
 int jvmr_heap_new_method_mirror(const struct JVMR_Class *reflection_class, const struct JVMR_Class *declaring_class, const struct JVMR_Method *method);
 int jvmr_heap_method_mirror(uint64_t reference, const struct JVMR_Class **declaring_class, const struct JVMR_Method **method);
+int jvmr_heap_new_constructor_mirror(const struct JVMR_Class *reflection_class, const struct JVMR_Class *declaring_class, const struct JVMR_Method *method);
+int jvmr_heap_constructor_mirror(uint64_t reference, const struct JVMR_Class **declaring_class, const struct JVMR_Method **method);
 int jvmr_heap_new_field_mirror(const struct JVMR_Class *reflection_class, const struct JVMR_Class *declaring_class, const struct JVMR_Field *field);
 int jvmr_heap_field_mirror(uint64_t reference, const struct JVMR_Class **declaring_class, const struct JVMR_Field **field);
+int jvmr_heap_new_constructor_mirror(const struct JVMR_Class *reflection_class, const struct JVMR_Class *declaring_class, const struct JVMR_Method *constructor);
+int jvmr_heap_constructor_mirror(uint64_t reference, const struct JVMR_Class **declaring_class, const struct JVMR_Method **constructor);
 int jvmr_heap_new_lambda(const struct JVMR_Class *interface_class, const struct JVMR_Class *implementation_class, const struct JVMR_Method *method, const uint64_t *captured, uint16_t captured_count);
 int jvmr_heap_lambda_info(uint64_t reference, const struct JVMR_Class **implementation_class, const struct JVMR_Method **method, const uint64_t **captured, uint16_t *captured_count);
 int jvmr_heap_new_string(const uint8_t *bytes, uint16_t length, const struct JVMR_Class *klass);

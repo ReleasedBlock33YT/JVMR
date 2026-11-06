@@ -20,6 +20,7 @@ typedef struct {
 	const JVMR_Class *represented_class;
 	const JVMR_Class *declaring_class;
 	const JVMR_Method *reflected_method;
+	const JVMR_Method *reflected_constructor;
 	const JVMR_Field *reflected_field;
 } HeapObject;
 
@@ -42,7 +43,7 @@ static int allocate(JVMR_HeapKind kind, int32_t length, const JVMR_Class *klass)
 		objects = next; object_capacity = capacity;
 	}
 	HeapObject *object = &objects[object_count];
-	object->kind = kind; object->length = length; object->elements = NULL; object->klass = klass; object->fields = NULL; object->text=NULL; object->text_length=0; object->implementation_class=NULL; object->lambda_method=NULL; object->captured=NULL; object->captured_count=0; object->represented_class=NULL; object->declaring_class=NULL; object->reflected_method=NULL; object->reflected_field=NULL;
+	object->kind = kind; object->length = length; object->elements = NULL; object->klass = klass; object->fields = NULL; object->text=NULL; object->text_length=0; object->implementation_class=NULL; object->lambda_method=NULL; object->captured=NULL; object->captured_count=0; object->represented_class=NULL; object->declaring_class=NULL; object->reflected_method=NULL; object->reflected_constructor=NULL; object->reflected_field=NULL;
 	if (kind == JVMR_HEAP_OBJECT && klass && klass->name && (!strcmp(klass->name,"java/lang/StringBuilder") || !strcmp(klass->name,"java/lang/AbstractStringBuilder"))) { object->text=strdup(""); if(!object->text)return -1; }
 	if (kind == JVMR_HEAP_OBJECT) { object->fields=calloc(256,sizeof(*object->fields)); if(!object->fields)return -1; }
 	if (kind != JVMR_HEAP_OBJECT && length > 0) {
@@ -57,6 +58,8 @@ int jvmr_heap_new_class_mirror(const struct JVMR_Class *represented_class,const 
 int jvmr_heap_class_mirror(uint64_t reference,const struct JVMR_Class **represented_class) { HeapObject *object=lookup(reference);if(!object||object->kind!=JVMR_HEAP_OBJECT||!object->represented_class||!represented_class)return -1;*represented_class=object->represented_class;return 0; }
 int jvmr_heap_new_method_mirror(const struct JVMR_Class *reflection_class,const struct JVMR_Class *declaring_class,const struct JVMR_Method *method) { int reference=allocate(JVMR_HEAP_OBJECT,0,reflection_class);if(reference<0)return -1;HeapObject *object=lookup((uint64_t)reference);object->declaring_class=declaring_class;object->reflected_method=method;return reference; }
 int jvmr_heap_method_mirror(uint64_t reference,const struct JVMR_Class **declaring_class,const struct JVMR_Method **method) { HeapObject *object=lookup(reference);if(!object||object->kind!=JVMR_HEAP_OBJECT||!object->reflected_method)return -1;if(declaring_class)*declaring_class=object->declaring_class;if(method)*method=object->reflected_method;return 0; }
+int jvmr_heap_new_constructor_mirror(const struct JVMR_Class *reflection_class,const struct JVMR_Class *declaring_class,const struct JVMR_Method *constructor) { int reference=allocate(JVMR_HEAP_OBJECT,0,reflection_class);if(reference<0)return -1;HeapObject *object=lookup((uint64_t)reference);object->declaring_class=declaring_class;object->reflected_constructor=constructor;return reference; }
+int jvmr_heap_constructor_mirror(uint64_t reference,const struct JVMR_Class **declaring_class,const struct JVMR_Method **constructor) { HeapObject *object=lookup(reference);if(!object||object->kind!=JVMR_HEAP_OBJECT||!object->reflected_constructor)return -1;if(declaring_class)*declaring_class=object->declaring_class;if(constructor)*constructor=object->reflected_constructor;return 0; }
 int jvmr_heap_new_field_mirror(const struct JVMR_Class *reflection_class,const struct JVMR_Class *declaring_class,const struct JVMR_Field *field) { int reference=allocate(JVMR_HEAP_OBJECT,0,reflection_class);if(reference<0)return -1;HeapObject *object=lookup((uint64_t)reference);object->declaring_class=declaring_class;object->reflected_field=field;return reference; }
 int jvmr_heap_field_mirror(uint64_t reference,const struct JVMR_Class **declaring_class,const struct JVMR_Field **field) { HeapObject *object=lookup(reference);if(!object||object->kind!=JVMR_HEAP_OBJECT||!object->reflected_field)return -1;if(declaring_class)*declaring_class=object->declaring_class;if(field)*field=object->reflected_field;return 0; }
 int jvmr_heap_new_lambda(const struct JVMR_Class *interface_class,const struct JVMR_Class *implementation_class,const struct JVMR_Method *method,const uint64_t *captured,uint16_t captured_count) { int reference=allocate(JVMR_HEAP_OBJECT,0,interface_class);if(reference<0)return -1;HeapObject *object=lookup((uint64_t)reference);object->implementation_class=implementation_class;object->lambda_method=method;object->captured_count=captured_count;if(captured_count){object->captured=malloc((size_t)captured_count*sizeof(*object->captured));if(!object->captured)return -1;memcpy(object->captured,captured,(size_t)captured_count*sizeof(*captured));}return reference; }

@@ -387,6 +387,16 @@ public final class Fixture {
         Point point = new Point(7, 5);
         return point.x() * 10 + point.y();
     }
+    public static int constructorReflectionValue() throws Exception {
+        java.lang.reflect.Constructor<?>[] constructors = Point.class.getDeclaredConstructors();
+        for (java.lang.reflect.Constructor<?> constructor : constructors) {
+            if (constructor.getParameterCount() == 2) {
+                Point point = (Point) constructor.newInstance(Integer.valueOf(8), Integer.valueOf(4));
+                return point.x() * 10 + point.y();
+            }
+        }
+        return 0;
+    }
     public static int objectMethodsValue() {
         Fixture first = new Fixture();
         Fixture second = new Fixture();
