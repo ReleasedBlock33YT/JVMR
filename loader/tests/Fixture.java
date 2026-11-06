@@ -397,6 +397,13 @@ public final class Fixture {
         }
         return 0;
     }
+    public static int classMetadataValue() {
+        Class<?>[] interfaces = ServiceImpl.class.getInterfaces();
+        return interfaces.length
+            + (interfaces.length == 1 && interfaces[0] == Service.class ? 10 : 0)
+            + (Service.class.isInterface() ? 100 : 0)
+            + (Mode.class.isEnum() ? 1000 : 0);
+    }
     public static int objectMethodsValue() {
         Fixture first = new Fixture();
         Fixture second = new Fixture();

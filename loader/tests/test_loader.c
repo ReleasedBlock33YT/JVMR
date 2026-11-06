@@ -482,6 +482,10 @@ static void test_class_file(const char *path) {
 			"Constructor reflection discovers and invokes a Java constructor");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 84,
 			"Constructor.newInstance preserves boxed arguments and object state");
+		CHECK(jvmr_execute_class_method(&klass, "classMetadataValue", "()I") == 0,
+			"Class interface and enum metadata queries execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 1111,
+			"Class metadata preserves implemented interfaces and enum identity");
 		CHECK(jvmr_execute_class_method(&klass, "objectMethodsValue", "()I") == 0,
 			"Object equals and toString execute for inherited methods");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 111,
