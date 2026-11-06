@@ -504,6 +504,13 @@ public final class Fixture {
         values.put("answer", 39);
         return values.get("answer") + values.size();
     }
+    public static int mapCompatibilityValue() {
+        java.util.Map<String, Integer> values = new HashMap<>();
+        values.put("answer", 39);
+        int fallback = values.getOrDefault("missing", 2);
+        int removed = values.remove("answer", 39) ? 10 : 0;
+        return fallback + removed + values.size();
+    }
     public static int lambdaValue() {
         IntUnaryOperator operation = x -> x + 3;
         return operation.applyAsInt(4);

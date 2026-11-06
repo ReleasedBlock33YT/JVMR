@@ -551,6 +551,10 @@ static void test_class_file(const char *path) {
 			"HashMap library bytecode executes through JMOD classes");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 40,
 			"HashMap put/get uses reference keys and boxed values");
+		CHECK(jvmr_execute_class_method(&klass, "mapCompatibilityValue", "()I") == 0,
+			"Map default, conditional insertion, and conditional removal execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 12,
+			"Map compatibility methods preserve existing and fallback values");
 		CHECK(jvmr_execute_class_method(&klass, "lambdaValue", "()I") == 0,
 			"invokedynamic creates a functional-interface lambda");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 7,
