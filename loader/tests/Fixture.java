@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Arrays;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.io.File;
@@ -510,6 +511,14 @@ public final class Fixture {
         int fallback = values.getOrDefault("missing", 2);
         int removed = values.remove("answer", 39) ? 10 : 0;
         return fallback + removed + values.size();
+    }
+    public static int arraysValue() {
+        int[] values = {3, 1, 2};
+        Arrays.sort(values);
+        int[] copy = Arrays.copyOf(values, 5);
+        Arrays.fill(copy, 3, 5, 9);
+        return values[0] * 100 + copy[4]
+            + (Arrays.equals(values, Arrays.copyOf(values, 3)) ? 1 : 0);
     }
     public static int lambdaValue() {
         IntUnaryOperator operation = x -> x + 3;
