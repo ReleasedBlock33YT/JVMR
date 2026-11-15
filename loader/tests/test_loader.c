@@ -563,6 +563,10 @@ static void test_class_file(const char *path) {
 			"HashMap lookup executes for user-defined value objects");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 42,
 			"HashMap compares same-class instance fields for value keys");
+		CHECK(jvmr_execute_class_method(&klass, "primitiveArraysValue", "()I") == 0,
+			"Arrays byte and long overloads execute");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 103,
+			"Arrays byte and long operations preserve sorted contents");
 		CHECK(jvmr_execute_class_method(&klass, "lambdaValue", "()I") == 0,
 			"invokedynamic creates a functional-interface lambda");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 7,

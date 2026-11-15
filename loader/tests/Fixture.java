@@ -533,6 +533,14 @@ public final class Fixture {
         values.put(new Key(7, "id"), 42);
         return values.get(new Key(7, "id"));
     }
+    public static int primitiveArraysValue() {
+        byte[] bytes = {3, 1, 2};
+        Arrays.sort(bytes);
+        long[] longs = {9L, 2L, 5L};
+        Arrays.sort(longs);
+        return bytes[0] * 100 + (int) longs[0]
+            + (Arrays.equals(bytes, Arrays.copyOf(bytes, 3)) ? 1 : 0);
+    }
     public static int lambdaValue() {
         IntUnaryOperator operation = x -> x + 3;
         return operation.applyAsInt(4);
