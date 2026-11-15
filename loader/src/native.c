@@ -85,6 +85,24 @@ static int directory_walk_descendants(uint64_t stream,const char *host,const cha
 static int native_list_factory(int count){const JVMR_Class *klass=jvmr_runtime_load_class_name("java/util/ArrayList");int reference=klass?jvmr_heap_new_object(klass):-1;if(reference<0||native_object_slots((uint64_t)reference))return -1;for(int i=0;i<count;i++)if(native_list_add((uint64_t)reference,current_frame.stack[current_frame.sp-count+i]))return -1;current_frame.sp-=count;current_frame.stack[current_frame.sp++]=(uint64_t)reference;return 0;}
 static int native_map_factory(int count){const JVMR_Class *klass=jvmr_runtime_load_class_name("java/util/HashMap");int reference=klass?jvmr_heap_new_object(klass):-1;if(reference<0||native_object_slots((uint64_t)reference))return -1;for(int i=0;i<count;i+=2)if(native_map_put((uint64_t)reference,current_frame.stack[current_frame.sp-count+i],current_frame.stack[current_frame.sp-count+i+1],NULL))return -1;current_frame.sp-=count;current_frame.stack[current_frame.sp++]=(uint64_t)reference;return 0;}
 static int native_set_factory(int count){const JVMR_Class *klass=jvmr_runtime_load_class_name("java/util/HashSet");int reference=klass?jvmr_heap_new_object(klass):-1;if(reference<0||native_object_slots((uint64_t)reference))return -1;for(int i=0;i<count;i++)if(native_map_put((uint64_t)reference,current_frame.stack[current_frame.sp-count+i],1,NULL))return -1;current_frame.sp-=count;current_frame.stack[current_frame.sp++]=(uint64_t)reference;return 0;}
+static int native_map_equal(uint64_t left,uint64_t right);
+static int native_object_equal(uint64_t left,uint64_t right,int depth){
+	if(depth>8)return 0;
+	const JVMR_Class *left_class=jvmr_heap_object_class(left),*right_class=jvmr_heap_object_class(right);
+	if(!left_class||!right_class||!left_class->name||!right_class->name||strcmp(left_class->name,right_class->name))return 0;
+	int compared=0;
+	for(const JVMR_Class *current=left_class;current;){
+		for(uint16_t i=0;i<current->field_count;i++){
+			const JVMR_Field *field=&current->fields[i];if(field->access_flags&0x0008)continue;
+			int offset=jvmr_runtime_field_offset(left_class,current,field);uint64_t left_value,right_value;
+			if(offset<0||jvmr_heap_field_load(left,(uint16_t)offset,&left_value)||jvmr_heap_field_load(right,(uint16_t)offset,&right_value))return 0;
+			compared=1;if(field->descriptor&& (field->descriptor[0]=='L'||field->descriptor[0]=='[')){if(!native_map_equal(left_value,right_value))return 0;}else if(left_value!=right_value)return 0;
+		}
+		if(!current->super_name)break;
+		current=jvmr_runtime_load_class_name(current->super_name);
+	}
+	return compared;
+}
 static int native_map_equal(uint64_t left,uint64_t right){
 	if(left==right)return 1;
 	if(!left||!right)return 0;
@@ -98,7 +116,7 @@ static int native_map_equal(uint64_t left,uint64_t right){
 		else if(!strcmp(left_class->name,"java/lang/Long"))descriptor="J";
 		if(descriptor){uint64_t left_value,right_value;if(!jvmr_heap_field_load_named(left,"value",descriptor,&left_value)&&!jvmr_heap_field_load_named(right,"value",descriptor,&right_value))return left_value==right_value;}
 	}
-	return 0;
+	return native_object_equal(left,right,0);
 }
 static int native_map_find(uint64_t reference,uint64_t key){if(reference>=native_object_capacity)return -1;for(size_t i=0;i<native_maps[reference].count;i++)if(native_map_equal(native_maps[reference].keys[i],key))return (int)i;return -1;}
 static int native_map_put(uint64_t reference,uint64_t key,uint64_t value,uint64_t *previous){if(native_object_slots(reference))return -1;NativeMap *map=&native_maps[reference];int position=native_map_find(reference,key);if(position>=0){if(previous)*previous=map->values[position];map->values[position]=value;return 0;}if(previous)*previous=0;if(map->count==map->capacity){size_t capacity=map->capacity?map->capacity*2:8;uint64_t *keys=realloc(map->keys,capacity*sizeof(*keys));if(!keys)return -1;map->keys=keys;uint64_t *values=realloc(map->values,capacity*sizeof(*values));if(!values)return -1;map->values=values;map->capacity=capacity;}map->keys[map->count]=key;map->values[map->count++]=value;return 0;}

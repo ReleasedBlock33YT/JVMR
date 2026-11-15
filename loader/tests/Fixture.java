@@ -19,6 +19,14 @@ import java.util.Iterator;
 import java.util.function.IntUnaryOperator;
 
 public final class Fixture {
+    private static final class Key {
+        private final int id;
+        private final String name;
+        private Key(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
     private int value;
     private static int initializedValue = 11;
     public static String constantString = "constant";
@@ -519,6 +527,11 @@ public final class Fixture {
         Arrays.fill(copy, 3, 5, 9);
         return values[0] * 100 + copy[4]
             + (Arrays.equals(values, Arrays.copyOf(values, 3)) ? 1 : 0);
+    }
+    public static int objectKeyMapValue() {
+        java.util.Map<Key, Integer> values = new HashMap<>();
+        values.put(new Key(7, "id"), 42);
+        return values.get(new Key(7, "id"));
     }
     public static int lambdaValue() {
         IntUnaryOperator operation = x -> x + 3;

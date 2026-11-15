@@ -559,6 +559,10 @@ static void test_class_file(const char *path) {
 			"Arrays sorting, copying, filling, and equality execute");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 110,
 			"Arrays operations preserve primitive array contents and lengths");
+		CHECK(jvmr_execute_class_method(&klass, "objectKeyMapValue", "()I") == 0,
+			"HashMap lookup executes for user-defined value objects");
+		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 42,
+			"HashMap compares same-class instance fields for value keys");
 		CHECK(jvmr_execute_class_method(&klass, "lambdaValue", "()I") == 0,
 			"invokedynamic creates a functional-interface lambda");
 		CHECK(current_frame.sp == 1 && current_frame.stack[0] == 7,
